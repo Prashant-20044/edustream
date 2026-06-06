@@ -242,7 +242,7 @@ export default function LandingPage() {
 
           <button 
             onClick={() => openAuth('login')}
-            className="bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-xl font-semibold text-sm transition-all hover:scale-[1.03] active:scale-[0.97]"
+            className="bg-white hover:bg-gray-100 text-black px-7 py-3 rounded-2xl font-bold text-base transition-all hover:scale-[1.03] active:scale-[0.97]"
           >
             Login
           </button>
@@ -250,12 +250,12 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-36 pb-32 overflow-hidden">
         
         {/* Dynamic Blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute h-[500px] w-[500px] bg-purple-600/15 rounded-full blur-[120px] top-20 left-[-100px] animate-pulse duration-[6000ms]" />
-          <div className="absolute h-[500px] w-[500px] bg-cyan-600/10 rounded-full blur-[120px] bottom-10 right-[-100px] animate-pulse duration-[8000ms]" />
+          <div className="absolute h-[600px] w-[600px] bg-purple-600/20 rounded-full blur-[140px] top-10 left-[-150px] animate-pulse duration-[6000ms]" />
+          <div className="absolute h-[600px] w-[600px] bg-cyan-600/15 rounded-full blur-[140px] bottom-5 right-[-150px] animate-pulse duration-[8000ms]" />
         </div>
 
         <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
@@ -264,11 +264,11 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs md:text-sm text-gray-300 backdrop-blur-md">
-              <Zap size={14} className="text-cyan-400" /> India's Next Generation Learning Platform
+            <span className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white/5 border border-white/10 text-sm md:text-base text-gray-300 backdrop-blur-md">
+              <Zap size={16} className="text-cyan-400" /> India's Next Generation Learning Platform
             </span>
 
-            <h1 className="text-5xl md:text-8xl font-black mt-8 leading-tight tracking-tight">
+            <h1 className="text-6xl md:text-9xl font-black mt-12 mb-8 leading-none tracking-tight">
               Learn.
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 {" "}Teach.
@@ -276,21 +276,21 @@ export default function LandingPage() {
               {" "}Grow.
             </h1>
 
-            <p className="text-gray-300 mt-6 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            <p className="text-gray-300 mt-8 mb-14 text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed">
               A comprehensive live stream learning environment. Connect with top educators, practice with interactive testing, and launch your career.
             </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <button 
                 onClick={() => openAuth('login', 'student')}
-                className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 px-8 py-4 rounded-2xl font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 px-12 py-5.5 rounded-2xl font-extrabold text-white text-lg shadow-xl shadow-indigo-500/25 transition-all hover:scale-[1.04] active:scale-[0.96]"
               >
                 Login as Student
               </button>
 
               <button 
                 onClick={() => openAuth('login', 'teacher')}
-                className="w-full sm:w-auto border border-white/20 hover:bg-white/5 px-8 py-4 rounded-2xl font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full sm:w-auto border border-white/20 hover:bg-white/5 hover:border-white/40 px-12 py-5.5 rounded-2xl font-bold text-white text-lg transition-all hover:scale-[1.04] active:scale-[0.96]"
               >
                 Login as Teacher
               </button>
@@ -300,8 +300,8 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-slate-950 border-y border-white/5">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 px-6">
+      <section className="py-28 bg-slate-950 border-y border-white/5">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-6">
           {[
             ["50K+", "Students"],
             ["2K+", "Teachers"],
@@ -314,18 +314,18 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
-              className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 md:p-8 text-center border border-white/10 hover:border-white/20 transition-colors"
+              className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 md:p-10 text-center border border-white/10 hover:border-white/20 transition-colors"
             >
-              <h2 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{value}</h2>
-              <p className="text-gray-400 mt-2 font-medium text-sm md:text-base">{label}</p>
+              <h2 className="text-4xl md:text-6xl font-black bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{value}</h2>
+              <p className="text-gray-400 mt-3 font-semibold text-sm md:text-base tracking-wide uppercase">{label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Student / Teacher Info Cards */}
-      <section className="py-32 px-6 relative">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10">
+      <section className="py-44 px-6 relative">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-14">
           
           {/* Student Card */}
           <motion.div 
@@ -333,25 +333,25 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group bg-gradient-to-br from-indigo-900/10 via-indigo-950/20 to-slate-900 border border-indigo-500/20 rounded-3xl p-8 md:p-12 hover:border-indigo-500/40 transition-all flex flex-col justify-between"
+            className="group bg-gradient-to-br from-indigo-900/10 via-indigo-950/20 to-slate-900 border border-indigo-500/20 rounded-3xl p-10 md:p-14 hover:border-indigo-500/40 transition-all flex flex-col justify-between"
           >
             <div>
-              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                <GraduationCap size={32} />
+              <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <GraduationCap size={40} />
               </div>
-              <h3 className="text-3xl font-bold mt-8">For Students</h3>
-              <p className="text-gray-400 mt-3 text-base">Unleash your potential with conceptual live learning paths and real-time validation.</p>
+              <h3 className="text-4xl font-extrabold mt-10">For Students</h3>
+              <p className="text-gray-400 mt-4 text-lg">Unleash your potential with conceptual live learning paths and real-time validation.</p>
               
-              <ul className="mt-8 space-y-4">
+              <ul className="mt-10 space-y-5">
                 {[
                   "Interactive Live Classrooms",
                   "Comprehensive Practice Mock Tests",
                   "AI-driven Learning paths & analytics",
                   "Verified Certifications for career milestones"
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-300 text-sm md:text-base">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
-                      <Check size={12} className="text-indigo-400" />
+                  <li key={item} className="flex items-center gap-4 text-gray-300 text-base md:text-lg">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+                      <Check size={14} className="text-indigo-400" />
                     </span>
                     <span>{item}</span>
                   </li>
@@ -361,9 +361,9 @@ export default function LandingPage() {
 
             <button 
               onClick={() => openAuth('signup', 'student')}
-              className="mt-10 inline-flex items-center gap-2 text-indigo-400 font-semibold group-hover:text-indigo-300 transition-colors w-fit focus:outline-none"
+              className="mt-12 inline-flex items-center justify-center gap-3 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:text-white px-8 py-4.5 rounded-2xl font-extrabold text-base transition-all hover:scale-[1.03] active:scale-[0.97] focus:outline-none w-full sm:w-fit"
             >
-              Start Learning <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              Start Learning <ChevronRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
             </button>
           </motion.div>
 
@@ -373,25 +373,25 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group bg-gradient-to-br from-cyan-900/10 via-cyan-950/20 to-slate-900 border border-cyan-500/20 rounded-3xl p-8 md:p-12 hover:border-cyan-500/40 transition-all flex flex-col justify-between"
+            className="group bg-gradient-to-br from-cyan-900/10 via-cyan-950/20 to-slate-900 border border-cyan-500/20 rounded-3xl p-10 md:p-14 hover:border-cyan-500/40 transition-all flex flex-col justify-between"
           >
             <div>
-              <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                <Users size={32} />
+              <div className="w-20 h-20 rounded-3xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Users size={40} />
               </div>
-              <h3 className="text-3xl font-bold mt-8">For Teachers</h3>
-              <p className="text-gray-400 mt-3 text-base">Build your digital academy, expand your reach across the nation, and earn doing what you love.</p>
+              <h3 className="text-4xl font-extrabold mt-10">For Teachers</h3>
+              <p className="text-gray-400 mt-4 text-lg">Build your digital academy, expand your reach across the nation, and earn doing what you love.</p>
               
-              <ul className="mt-8 space-y-4">
+              <ul className="mt-10 space-y-5">
                 {[
                   "Structured Multi-chapter Course Creator",
                   "Broadcast Live to 1000+ students instantly",
                   "Fair Revenue Sharing & Instant Payouts",
                   "Granular attendance and performance analytics"
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-300 text-sm md:text-base">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                      <Check size={12} className="text-cyan-400" />
+                  <li key={item} className="flex items-center gap-4 text-gray-300 text-base md:text-lg">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                      <Check size={14} className="text-cyan-400" />
                     </span>
                     <span>{item}</span>
                   </li>
@@ -401,9 +401,9 @@ export default function LandingPage() {
 
             <button 
               onClick={() => openAuth('signup', 'teacher')}
-              className="mt-10 inline-flex items-center gap-2 text-cyan-400 font-semibold group-hover:text-cyan-300 transition-colors w-fit focus:outline-none"
+              className="mt-12 inline-flex items-center justify-center gap-3 bg-cyan-600/10 hover:bg-cyan-600/20 border border-cyan-500/30 text-cyan-300 hover:text-white px-8 py-4.5 rounded-2xl font-extrabold text-base transition-all hover:scale-[1.03] active:scale-[0.97] focus:outline-none w-full sm:w-fit"
             >
-              Start Teaching <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              Start Teaching <ChevronRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
             </button>
           </motion.div>
 
@@ -411,14 +411,14 @@ export default function LandingPage() {
       </section>
 
       {/* Courses Section */}
-      <section className="py-32 bg-slate-950/50" id="courses">
+      <section className="py-44 bg-slate-950/50" id="courses">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Explore Popular Live Courses</h2>
-            <p className="text-gray-400 mt-4 text-base md:text-lg">Gain top conceptual knowledge in physics, chemistry, and mathematics with leading coaches.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Explore Popular Live Courses</h2>
+            <p className="text-gray-400 mt-5 text-lg md:text-xl">Gain top conceptual knowledge in physics, chemistry, and mathematics with leading coaches.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mt-20">
+          <div className="grid md:grid-cols-3 gap-10 mt-24">
             {courses.map((course, index) => (
               <motion.div
                 key={course.title}
@@ -426,7 +426,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.5 }}
-                className={`group bg-gradient-to-b ${course.color} border rounded-3xl p-6 hover:scale-[1.02] hover:border-white/20 transition-all duration-300 flex flex-col justify-between`}
+                className={`group bg-gradient-to-b ${course.color} border rounded-3xl p-8 hover:scale-[1.02] hover:border-white/20 transition-all duration-300 flex flex-col justify-between`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -459,14 +459,14 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-32" id="features">
+      <section className="py-44" id="features">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Why Choose EduVerse?</h2>
-            <p className="text-gray-400 mt-4 text-base md:text-lg">Unleashing digital tools configured specifically to help learners and teachers succeed together.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Why Choose EduVerse?</h2>
+            <p className="text-gray-400 mt-5 text-lg md:text-xl">Unleashing digital tools configured specifically to help learners and teachers succeed together.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mt-20">
+          <div className="grid md:grid-cols-3 gap-10 mt-24">
             {[
               {
                 icon: <BookOpen className="text-indigo-400" size={28} />,
@@ -490,7 +490,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="bg-white/5 hover:bg-white/10 rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all group duration-300"
+                className="bg-white/5 hover:bg-white/10 rounded-3xl p-10 border border-white/10 hover:border-white/20 transition-all group duration-300"
               >
                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                   {item.icon}
@@ -504,14 +504,14 @@ export default function LandingPage() {
       </section>
 
       {/* Teachers Showcase Section */}
-      <section className="py-32 bg-slate-950/50" id="teachers">
+      <section className="py-44 bg-slate-950/50" id="teachers">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Meet Our Master Instructors</h2>
-            <p className="text-gray-400 mt-4 text-base md:text-lg">Learn directly from legends who have helped thousands of students clear the toughest entrance exams.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Meet Our Master Instructors</h2>
+            <p className="text-gray-400 mt-5 text-lg md:text-xl">Learn directly from legends who have helped thousands of students clear the toughest entrance exams.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mt-20">
+          <div className="grid md:grid-cols-3 gap-10 mt-24">
             {teachers.map((teacher, index) => (
               <motion.div
                 key={teacher.name}
@@ -519,7 +519,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15, duration: 0.5 }}
-                className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 hover:border-white/15 hover:bg-slate-900/60 transition-all flex flex-col justify-between"
+                className="bg-slate-900/40 border border-white/5 rounded-3xl p-10 hover:border-white/15 hover:bg-slate-900/60 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -550,14 +550,14 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-32" id="faq">
+      <section className="py-44" id="faq">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
-            <p className="text-gray-400 mt-4 text-base md:text-lg">Find answers to basic questions regarding how virtual classrooms function.</p>
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-gray-400 mt-5 text-lg md:text-xl">Find answers to basic questions regarding how virtual classrooms function.</p>
           </div>
 
-          <div className="bg-slate-900/30 border border-white/5 rounded-[32px] p-6 md:p-10 backdrop-blur-md">
+          <div className="bg-slate-900/30 border border-white/5 rounded-[32px] p-8 md:p-14 backdrop-blur-md">
             <FAQItem 
               question="What is EduVerse?" 
               answer="EduVerse is India's next-generation learning platform built on a low-latency live streaming network. We connect passionate teachers with eager students to facilitate high-quality real-time lectures, tests, and conceptual growth."
@@ -579,29 +579,29 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 relative">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-r from-indigo-700 via-purple-700 to-cyan-700 p-10 md:p-20 text-center shadow-2xl">
+      <section className="py-44 relative">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="relative overflow-hidden rounded-[48px] bg-gradient-to-r from-indigo-700 via-purple-700 to-cyan-700 p-14 md:p-24 text-center shadow-2xl">
             {/* CTA Background decorative shapes */}
             <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">Ready To Start Your Journey?</h2>
-            <p className="mt-6 text-base md:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-4xl md:text-7xl font-black tracking-tight leading-none mb-4">Ready To Start Your Journey?</h2>
+            <p className="mt-8 text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
               Join thousands of learners mastering complicated topics and experienced educators scaling their classrooms digitally.
             </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <div className="mt-14 flex flex-col sm:flex-row justify-center items-center gap-6">
               <button 
                 onClick={() => openAuth('signup', 'student')}
-                className="w-full sm:w-auto bg-white hover:bg-gray-100 text-black px-8 py-4 rounded-2xl font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto bg-white hover:bg-gray-100 text-black px-12 py-5.5 rounded-2xl font-extrabold shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-lg"
               >
                 Student Sign Up
               </button>
 
               <button 
                 onClick={() => openAuth('signup', 'teacher')}
-                className="w-full sm:w-auto border border-white hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-semibold hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto border border-white hover:bg-white/10 text-white px-12 py-5.5 rounded-2xl font-bold hover:scale-[1.03] active:scale-[0.97] transition-all text-lg"
               >
                 Teacher Sign Up
               </button>
