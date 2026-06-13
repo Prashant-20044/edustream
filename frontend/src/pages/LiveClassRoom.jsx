@@ -144,15 +144,16 @@ const LiveClassRoom = () => {
     }
   };
 
-  const handleUploadPpt = async () => {
-    if (!isTeacher || !pptFile || uploadingPpt) return;
+  const handleUploadPpt = async (fileToUpload) => {
+    const file = fileToUpload instanceof File ? fileToUpload : pptFile;
+    if (!isTeacher || !file || uploadingPpt) return;
 
     setUploadingPpt(true);
     setPptError('');
 
     try {
       const formData = new FormData();
-      formData.append('file', pptFile);
+      formData.append('file', file);
 
       const res = await axios.post(`/api/upload/material/${classId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -193,7 +194,40 @@ const LiveClassRoom = () => {
           </button>
           <h2>{classTopic}</h2>
         </div>
-        <div className="header-right">
+        <div className="header-right" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {isTeacher && (
+            <>
+              {/* Hidden file input for PPT broadcast */}
+              <input
+                id="ppt-upload-input"
+                type="file"
+                accept=".pdf,.ppt,.pptx"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setPptFile(file);
+                    handleUploadPpt(file);
+                  }
+                }}
+              />
+              <button
+                className="btn-primary btn-sm"
+                onClick={() => document.getElementById('ppt-upload-input').click()}
+                disabled={uploadingPpt}
+              >
+                {uploadingPpt ? 'Broadcasting...' : '📤 Broadcast Slides'}
+              </button>
+
+              <button
+                className="btn-primary btn-sm generate-notes-btn"
+                onClick={handleGenerateNotesPdf}
+                disabled={isGeneratingNotes || whiteboardSnapshots.length === 0}
+              >
+                {isGeneratingNotes ? 'Generating PDF...' : '⬇️ Save & Download PDF'}
+              </button>
+            </>
+          )}
           <span className="role-badge">{isTeacher ? 'Broadcasting' : 'Viewing'}</span>
         </div>
       </header>
@@ -216,33 +250,11 @@ const LiveClassRoom = () => {
             onSnapshotSaved={handleSnapshotSaved}
           />
 
-          {/* PPT/PDF Broadcast Panel - teacher uploads, students see it live */}
-          {isTeacher && (
-            <section className="class-materials-panel glass-panel" aria-label="Broadcast slides">
+          {/* PPT/PDF Broadcast Status - teacher uploads from navbar, but shows status here */}
+          {isTeacher && (pptError || broadcastedPpt) && (
+            <section className="class-materials-panel glass-panel" aria-label="Broadcast slides status">
               <div className="materials-heading">
-                <h3>📤 Broadcast Slides</h3>
-              </div>
-              <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '10px' }}>
-                Upload a PPT or PDF — students will see it instantly in their classroom.
-              </p>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                <input
-                  id="ppt-upload-input"
-                  type="file"
-                  accept=".pdf,.ppt,.pptx"
-                  className="input-field"
-                  style={{ flex: 1, minWidth: 0, fontSize: '0.82rem' }}
-                  onChange={(e) => setPptFile(e.target.files?.[0] || null)}
-                />
-                <button
-                  className="btn-primary"
-                  onClick={handleUploadPpt}
-                  disabled={!pptFile || uploadingPpt}
-                  type="button"
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  {uploadingPpt ? 'Broadcasting...' : '📡 Broadcast'}
-                </button>
+                <h3>📤 Broadcast Status</h3>
               </div>
               {pptError && <div className="materials-error" style={{ marginTop: 8 }}>{pptError}</div>}
               {broadcastedPpt && (
@@ -287,22 +299,10 @@ const LiveClassRoom = () => {
                 <h3>Class notes</h3>
                 <span>{whiteboardSnapshots.length}</span>
               </div>
-              {isTeacher && (
-                <>
-                  <button
-                    className="btn-primary btn-full generate-notes-btn"
-                    onClick={handleGenerateNotesPdf}
-                    disabled={isGeneratingNotes || whiteboardSnapshots.length === 0}
-                    type="button"
-                  >
-                    {isGeneratingNotes ? 'Generating PDF...' : '⬇️ Generate & Download PDF'}
-                  </button>
-                  {whiteboardSnapshots.length === 0 && (
-                    <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: 6 }}>
-                      Save at least one whiteboard snapshot first.
-                    </p>
-                  )}
-                </>
+              {isTeacher && whiteboardSnapshots.length === 0 && (
+                <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: 6 }}>
+                  Save at least one whiteboard snapshot first.
+                </p>
               )}
               {materialsError && <div className="materials-error">{materialsError}</div>}
               {notesPdfs.length > 0 && (
