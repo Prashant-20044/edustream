@@ -95,17 +95,42 @@ router.post('/google', async (req, res) => {
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const trimmedName = name?.trim();
 
-    if (!name || !email || !password) {
+    if (!trimmedName || !normalizedEmail || !password) {
       return res.status(400).json({ success: false, message: 'Please provide all required fields' });
     }
 
     const requestedRole = ['teacher', 'student'].includes(role) ? role : 'student';
 
     // Check if user already exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: normalizedEmail });
     if (user) {
-      return res.status(400).json({ success: false, message: 'A user with this email already exists' });
+      if (user.password) {
+        return res.status(400).json({ success: false, message: 'A user with this email already exists' });
+      }
+
+      // Allow users who originally joined with Google to add email/password login.
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+      user.name = trimmedName;
+      user.role = requestedRole;
+      await user.save();
+
+      const token = generateToken(user);
+
+      return res.status(200).json({
+        success: true,
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar
+        }
+      });
     }
 
     // Hash password
@@ -114,8 +139,8 @@ router.post('/signup', async (req, res) => {
 
     // Create user
     user = new User({
-      name,
-      email,
+      name: trimmedName,
+      email: normalizedEmail,
       password: hashedPassword,
       role: requestedRole
     });
@@ -147,13 +172,14 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
     // Check for user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }

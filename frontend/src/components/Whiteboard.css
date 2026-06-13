@@ -13,6 +13,30 @@
   border-radius: 12px;
 }
 
+.whiteboard-scroll-area {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(37, 99, 235, 0.55) rgba(226, 232, 240, 0.75);
+  scrollbar-width: thin;
+}
+
+.whiteboard-scroll-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.whiteboard-scroll-area::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.75);
+}
+
+.whiteboard-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.55);
+  border-radius: 999px;
+}
+
 .whiteboard-toolbar {
   position: absolute;
   top: 14px;
@@ -233,9 +257,9 @@
 
 .whiteboard-canvas {
   width: 100%;
-  height: 100%;
-  flex: 1;
+  display: block;
   touch-action: none;
+  background: #ffffff;
 }
 
 .whiteboard-canvas.is-editable {

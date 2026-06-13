@@ -55,12 +55,12 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithCredentials = async (email, password) => {
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post('/api/auth/login', { email: email.trim().toLowerCase(), password });
       if (res.data.success) {
         localStorage.setItem('token', res.data.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         setUser(res.data.user);
-        return { success: true };
+        return { success: true, user: res.data.user };
       }
       return { success: false, message: 'Login failed' };
     } catch (error) {
@@ -74,12 +74,17 @@ export const AuthProvider = ({ children }) => {
 
   const signupWithCredentials = async (name, email, password, role) => {
     try {
-      const res = await axios.post('/api/auth/signup', { name, email, password, role });
+      const res = await axios.post('/api/auth/signup', {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        role
+      });
       if (res.data.success) {
         localStorage.setItem('token', res.data.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         setUser(res.data.user);
-        return { success: true };
+        return { success: true, user: res.data.user };
       }
       return { success: false, message: 'Signup failed' };
     } catch (error) {

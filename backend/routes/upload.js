@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const http = require('http');
+const https = require('https');
+const PDFDocument = require('pdfkit');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
 const { protect } = require('./auth');
@@ -35,6 +38,63 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
+const fetchBuffer = (url) => new Promise((resolve, reject) => {
+  const client = url.startsWith('https') ? https : http;
+
+  client.get(url, (response) => {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      reject(new Error(`Could not fetch image. Status: ${response.statusCode}`));
+      response.resume();
+      return;
+    }
+
+    const chunks = [];
+    response.on('data', (chunk) => chunks.push(chunk));
+    response.on('end', () => resolve(Buffer.concat(chunks)));
+  }).on('error', reject);
+});
+
+const createNotesPdf = async (snapshots, title) => new Promise(async (resolve, reject) => {
+  try {
+    const document = new PDFDocument({
+      autoFirstPage: false,
+      compress: true,
+      margin: 36,
+      size: 'A4',
+    });
+    const chunks = [];
+
+    document.on('data', (chunk) => chunks.push(chunk));
+    document.on('end', () => resolve(Buffer.concat(chunks)));
+    document.on('error', reject);
+
+    document.info.Title = `${title} - Whiteboard Notes`;
+
+    for (const [index, snapshot] of snapshots.entries()) {
+      const imageBuffer = await fetchBuffer(snapshot.url);
+
+      document.addPage();
+      document
+        .fontSize(11)
+        .fillColor('#475569')
+        .text(`${title} - Page ${index + 1}`, 36, 22, { align: 'center' });
+
+      document.image(imageBuffer, 36, 52, {
+        fit: [
+          document.page.width - 72,
+          document.page.height - 88,
+        ],
+        align: 'center',
+        valign: 'top',
+      });
+    }
+
+    document.end();
+  } catch (err) {
+    reject(err);
+  }
+});
+
 // @route POST /api/upload/material/:classId
 // @desc Upload a material (PPT/PDF/Image) for a specific class
 router.post('/material/:classId', protect, upload.single('file'), async (req, res) => {
@@ -66,6 +126,101 @@ router.post('/material/:classId', protect, upload.single('file'), async (req, re
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ success: false, message: 'Upload failed' });
+  }
+});
+
+// @route POST /api/upload/whiteboard/:classId
+// @desc Save the current whiteboard as an image material for students
+router.post('/whiteboard/:classId', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'teacher') {
+      return res.status(403).json({ success: false, message: 'Only teachers can save whiteboard snapshots' });
+    }
+
+    const { imageData, filename } = req.body;
+    if (!imageData || !imageData.startsWith('data:image/png;base64,')) {
+      return res.status(400).json({ success: false, message: 'A PNG whiteboard image is required' });
+    }
+
+    const classObj = await Class.findById(req.params.classId);
+    if (!classObj) {
+      return res.status(404).json({ success: false, message: 'Class not found' });
+    }
+
+    if (classObj.teacherId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'You can only save snapshots for your own classes' });
+    }
+
+    const safeFilename = filename?.trim() || `whiteboard-${Date.now()}.png`;
+    const uploadResult = await cloudinary.uploader.upload(imageData, {
+      folder: 'coaching_whiteboards',
+      resource_type: 'image',
+      public_id: `${req.params.classId}-${Date.now()}`,
+    });
+
+    const newMaterial = {
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+      filename: safeFilename,
+      type: 'whiteboard-snapshot'
+    };
+
+    classObj.materials.push(newMaterial);
+    await classObj.save();
+
+    res.json({ success: true, material: newMaterial, class: classObj });
+  } catch (err) {
+    console.error('Whiteboard snapshot upload error:', err);
+    res.status(500).json({ success: false, message: 'Could not save whiteboard snapshot' });
+  }
+});
+
+// @route POST /api/upload/whiteboard-notes/:classId
+// @desc Generate one PDF notes file from saved whiteboard snapshots
+router.post('/whiteboard-notes/:classId', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'teacher') {
+      return res.status(403).json({ success: false, message: 'Only teachers can generate class notes' });
+    }
+
+    const classObj = await Class.findById(req.params.classId);
+    if (!classObj) {
+      return res.status(404).json({ success: false, message: 'Class not found' });
+    }
+
+    if (classObj.teacherId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'You can only generate notes for your own classes' });
+    }
+
+    const snapshots = classObj.materials.filter((material) => material.type === 'whiteboard-snapshot');
+    if (!snapshots.length) {
+      return res.status(400).json({ success: false, message: 'Save at least one whiteboard snapshot before generating PDF notes' });
+    }
+
+    const pdfBuffer = await createNotesPdf(snapshots, classObj.topic);
+    const base64Pdf = `data:application/pdf;base64,${pdfBuffer.toString('base64')}`;
+    const timestamp = Date.now();
+    const uploadResult = await cloudinary.uploader.upload(base64Pdf, {
+      folder: 'coaching_whiteboard_notes',
+      resource_type: 'raw',
+      public_id: `${req.params.classId}-notes-${timestamp}`,
+      format: 'pdf',
+    });
+
+    const newMaterial = {
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+      filename: `${classObj.topic || 'class'}-whiteboard-notes.pdf`,
+      type: 'whiteboard-notes-pdf'
+    };
+
+    classObj.materials.push(newMaterial);
+    await classObj.save();
+
+    res.json({ success: true, material: newMaterial, class: classObj });
+  } catch (err) {
+    console.error('Whiteboard notes PDF error:', err);
+    res.status(500).json({ success: false, message: 'Could not generate whiteboard notes PDF' });
   }
 });
 

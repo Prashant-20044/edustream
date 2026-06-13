@@ -27,7 +27,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 
 // Socket.io initialization
 const io = new Server(server, {

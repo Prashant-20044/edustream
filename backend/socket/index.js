@@ -1,3 +1,24 @@
+const whiteboardStates = new Map();
+
+const getEmptyBoardState = () => ({
+  history: [],
+  boardHeight: 1600,
+});
+
+const normalizeBoardState = (payload) => {
+  if (Array.isArray(payload)) {
+    return {
+      history: payload,
+      boardHeight: 1600,
+    };
+  }
+
+  return {
+    history: Array.isArray(payload?.history) ? payload.history : [],
+    boardHeight: Number(payload?.boardHeight) || 1600,
+  };
+};
+
 module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
@@ -15,7 +36,7 @@ module.exports = (io) => {
       // Notify others in the room
       socket.to(roomId).emit('user-connected', { userId, userName, role, socketId: socket.id });
 
-      // Send chat history or initial state here if stored in DB
+      socket.emit('sync-board', whiteboardStates.get(roomId) || getEmptyBoardState());
 
       socket.on('disconnect', async () => {
         console.log(`User ${userName} disconnected from room ${roomId}`);
@@ -26,6 +47,7 @@ module.exports = (io) => {
           try {
             const Class = require('../models/Class');
             await Class.findByIdAndUpdate(roomId, { status: 'ended' });
+            whiteboardStates.delete(roomId);
             console.log(`Class ${roomId} auto-ended due to teacher disconnect.`);
             
             // Notify other clients in the room that the stream ended
@@ -84,11 +106,26 @@ module.exports = (io) => {
     
     socket.on('clear-board', (roomId) => {
       console.log(`clear-board event in room ${roomId}`);
+      whiteboardStates.set(roomId, getEmptyBoardState());
       socket.to(roomId).emit('clear-board');
     });
 
-    socket.on('sync-board', (roomId, history) => {
-      socket.to(roomId).emit('sync-board', history);
+    socket.on('sync-board', (roomId, payload) => {
+      const boardState = normalizeBoardState(payload);
+      whiteboardStates.set(roomId, boardState);
+      socket.to(roomId).emit('sync-board', boardState);
+    });
+
+    socket.on('request-board-sync', (roomId) => {
+      socket.emit('sync-board', whiteboardStates.get(roomId) || getEmptyBoardState());
+    });
+
+    socket.on('whiteboard-snapshot-saved', (roomId, material) => {
+      socket.to(roomId).emit('whiteboard-snapshot-saved', material);
+    });
+
+    socket.on('whiteboard-notes-generated', (roomId, material) => {
+      socket.to(roomId).emit('whiteboard-notes-generated', material);
     });
 
     // --- Notifications ---

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import axios from 'axios';
 import './Whiteboard.css';
 
 const BOARD_BACKGROUND = '#ffffff';
+const INITIAL_BOARD_HEIGHT = 1600;
+const BOARD_HEIGHT_STEP = 800;
 const COLORS = ['#111827', '#2563eb', '#dc2626', '#16a34a', '#f59e0b', '#7c3aed'];
 const TOOL_LABELS = {
   pen: 'Pen',
@@ -12,10 +15,12 @@ const TOOL_LABELS = {
   text: 'Text',
 };
 
-const Whiteboard = ({ socket, roomId, isTeacher }) => {
+const Whiteboard = ({ socket, roomId, isTeacher, onSnapshotSaved }) => {
   const canvasRef = useRef(null);
+  const scrollRef = useRef(null);
   const contextRef = useRef(null);
   const boardSizeRef = useRef({ width: 0, height: 0 });
+  const boardHeightRef = useRef(INITIAL_BOARD_HEIGHT);
   const historyRef = useRef([]);
   const redoRef = useRef([]);
   const activeActionRef = useRef(null);
@@ -28,6 +33,9 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
   const [historyCount, setHistoryCount] = useState(0);
   const [redoCount, setRedoCount] = useState(0);
   const [hoverDrawMode, setHoverDrawMode] = useState(false);
+  const [boardHeight, setBoardHeight] = useState(INITIAL_BOARD_HEIGHT);
+  const [saveStatus, setSaveStatus] = useState('');
+  const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
   // Tracks the last seen pointer device type for the status indicator
   const [activePointerType, setActivePointerType] = useState(null);
   // Tracks whether the pointer is physically pressed (for non-hover mode)
@@ -41,6 +49,10 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
   const canRedo = redoCount > 0;
 
   const selectedToolLabel = useMemo(() => TOOL_LABELS[tool] || 'Tool', [tool]);
+
+  useEffect(() => {
+    boardHeightRef.current = boardHeight;
+  }, [boardHeight]);
 
   const syncCounts = useCallback(() => {
     setHistoryCount(historyRef.current.length);
@@ -123,7 +135,10 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
 
   const broadcastHistory = useCallback(() => {
     if (socket && roomId) {
-      socket.emit('sync-board', roomId, historyRef.current);
+      socket.emit('sync-board', roomId, {
+        history: historyRef.current,
+        boardHeight: boardHeightRef.current,
+      });
     }
   }, [roomId, socket]);
 
@@ -199,10 +214,20 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
       syncCounts();
     };
 
-    const handleSyncBoard = (syncedHistory = []) => {
-      historyRef.current = syncedHistory;
+    const handleSyncBoard = (payload = []) => {
+      const nextHistory = Array.isArray(payload) ? payload : payload.history || [];
+      const nextBoardHeight = Array.isArray(payload) ? boardHeightRef.current : payload.boardHeight;
+
+      historyRef.current = nextHistory;
       redoRef.current = [];
-      redrawBoard();
+
+      if (nextBoardHeight && nextBoardHeight !== boardHeightRef.current) {
+        boardHeightRef.current = nextBoardHeight;
+        setBoardHeight(nextBoardHeight);
+      } else {
+        redrawBoard();
+      }
+
       syncCounts();
     };
 
@@ -210,12 +235,20 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
     socket.on('clear-board', handleClearBoard);
     socket.on('sync-board', handleSyncBoard);
 
+    if (roomId) {
+      socket.emit('request-board-sync', roomId);
+    }
+
     return () => {
       socket.off('draw-action', handleDrawAction);
       socket.off('clear-board', handleClearBoard);
       socket.off('sync-board', handleSyncBoard);
     };
   }, [clearCanvas, getContext, redrawBoard, socket, syncCounts]);
+
+  useEffect(() => {
+    resizeCanvas();
+  }, [boardHeight, resizeCanvas]);
 
   const getPoint = (event) => {
     const canvas = canvasRef.current;
@@ -482,6 +515,61 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
     image.click();
   };
 
+  const handleSaveSnapshot = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !isTeacher || isSavingSnapshot) return;
+
+    setIsSavingSnapshot(true);
+    setSaveStatus('');
+
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `whiteboard-${roomId || 'class'}-${timestamp}.png`;
+      const res = await axios.post(`/api/upload/whiteboard/${roomId}`, {
+        imageData: canvas.toDataURL('image/png'),
+        filename,
+      });
+
+      if (res.data.success) {
+        setSaveStatus('Saved for students');
+        onSnapshotSaved?.(res.data.material);
+        socket?.emit('whiteboard-snapshot-saved', roomId, res.data.material);
+      }
+    } catch (err) {
+      setSaveStatus(err.response?.data?.message || 'Save failed');
+    } finally {
+      setIsSavingSnapshot(false);
+      window.setTimeout(() => setSaveStatus(''), 3000);
+    }
+  };
+
+  const scrollBoard = (position) => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+
+    scrollElement.scrollTo({
+      top: position === 'top' ? 0 : scrollElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleAddSpace = () => {
+    if (!isTeacher) return;
+
+    const nextHeight = boardHeightRef.current + BOARD_HEIGHT_STEP;
+    boardHeightRef.current = nextHeight;
+    setBoardHeight(nextHeight);
+
+    if (socket && roomId) {
+      socket.emit('sync-board', roomId, {
+        history: historyRef.current,
+        boardHeight: nextHeight,
+      });
+    }
+
+    window.setTimeout(() => scrollBoard('bottom'), 80);
+  };
+
   const selectTool = (nextTool) => {
     setTool(nextTool);
     // Hover-draw only makes sense for path tools; auto-disable for shapes/text
@@ -576,10 +664,25 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
               Redo
             </button>
             <button className="whiteboard-action-btn" onClick={handleDownload} type="button">
-              Save
+              Download
+            </button>
+            <button className="whiteboard-action-btn" onClick={handleSaveSnapshot} disabled={isSavingSnapshot} type="button">
+              {isSavingSnapshot ? 'Saving...' : 'Save Snap'}
             </button>
             <button className="whiteboard-action-btn danger" onClick={handleClear} disabled={!canUndo} type="button">
               Clear
+            </button>
+          </div>
+
+          <div className="whiteboard-tool-section">
+            <button className="whiteboard-action-btn" onClick={() => scrollBoard('top')} type="button">
+              Top
+            </button>
+            <button className="whiteboard-action-btn" onClick={() => scrollBoard('bottom')} type="button">
+              Bottom
+            </button>
+            <button className="whiteboard-action-btn" onClick={handleAddSpace} type="button">
+              Add Space
             </button>
           </div>
         </div>
@@ -589,6 +692,7 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
 
       <div className="whiteboard-status">
         <span>{selectedToolLabel}</span>
+        {saveStatus && <span>{saveStatus}</span>}
         {activePointerType && (
           <span className={`pointer-type-badge pointer-type-${activePointerType}`}>
             {activePointerType === 'pen' && '✏️ Stylus'}
@@ -599,16 +703,19 @@ const Whiteboard = ({ socket, roomId, isTeacher }) => {
         <span>{isTeacher ? 'Editable' : 'View only'}</span>
       </div>
 
-      <canvas
-        ref={canvasRef}
-        className={`whiteboard-canvas ${isTeacher ? 'is-editable' : 'is-readonly'} ${hoverDrawMode ? 'hover-draw-active' : ''}`}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={finishDrawing}
-        onPointerCancel={finishDrawing}
-        onPointerLeave={finishDrawing}
-        onPointerEnter={handlePointerEnter}
-      />
+      <div className="whiteboard-scroll-area" ref={scrollRef}>
+        <canvas
+          ref={canvasRef}
+          className={`whiteboard-canvas ${isTeacher ? 'is-editable' : 'is-readonly'} ${hoverDrawMode ? 'hover-draw-active' : ''}`}
+          style={{ height: `${boardHeight}px` }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={finishDrawing}
+          onPointerCancel={finishDrawing}
+          onPointerLeave={finishDrawing}
+          onPointerEnter={handlePointerEnter}
+        />
+      </div>
     </section>
   );
 };
