@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -6,58 +6,20 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   GraduationCap,
-  BookOpen,
   Users,
-  Award,
   ChevronRight,
-  PlayCircle,
   X,
   Check,
-  Calendar,
-  Star,
-  ChevronDown,
   ArrowRight,
-  ShieldCheck,
-  Zap,
+  Mail,
+  Lock,
+  User,
 } from 'lucide-react';
 import HLS from 'hls.js';
 import './LandingPage.css';
 import ParticleButton from '../components/ParticleButton';
 
-// FAQ Accordion Item Component
-function FAQItem({ question, answer }) {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="border-b border-white/10 py-8">
-      <button
-        className="w-full flex justify-between items-center text-left text-lg md:text-xl font-semibold hover:text-green-400 transition-colors focus:outline-none px-3 py-2"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span>{question}</span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-gray-400 ml-4 flex-shrink-0"
-        >
-          <ChevronDown size={20} />
-        </motion.div>
-      </button>
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: "auto", opacity: 1, marginTop: 12 }}
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden text-gray-400 text-sm md:text-base leading-relaxed"
-          >
-            {answer}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+
 
 export default function LandingPage() {
   const { loginWithOAuth, loginWithCredentials, signupWithCredentials, user } = useContext(AuthContext);
@@ -168,6 +130,7 @@ export default function LandingPage() {
         }
       }
     } catch (err) {
+      console.error('Custom submit failed:', err);
       setAuthError('An unexpected error occurred. Please try again.');
     } finally {
       setSubmitting(false);
@@ -484,13 +447,7 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 50,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '16px',
-              background: 'rgba(0,0,0,0.75)',
-              backdropFilter: 'blur(12px)',
-            }}
+            className="auth-modal-overlay"
             onClick={() => setIsAuthModalOpen(false)}
           >
             <motion.div
@@ -498,55 +455,32 @@ export default function LandingPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              style={{
-                position: 'relative', width: '100%', maxWidth: '480px',
-                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '28px',
-                padding: '40px 36px',
-                boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
-                overflow: 'hidden',
-              }}
+              className="auth-modal-container"
               onClick={(e) => e.stopPropagation()}
             >
-              <motion.div
-                style={{
-                  display: 'flex', gap: 12, marginBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.1)',
-                  paddingBottom: 20,
-                }}
-              >
+              <div className="auth-tabs">
                 <button
+                  type="button"
                   onClick={() => { setActiveTab('login'); setAuthError(''); }}
-                  style={{
-                    flex: 1, padding: '12px 0', fontWeight: 700, fontSize: 16,
-                    color: activeTab === 'login' ? 'white' : '#6b7280',
-                    borderBottom: activeTab === 'login' ? '2px solid #10b981' : 'none',
-                    background: 'none', border: 'none', cursor: 'pointer'
-                  }}
+                  className={`auth-tab-btn ${activeTab === 'login' ? 'active' : ''}`}
                 >
                   Sign In
                 </button>
                 <button
+                  type="button"
                   onClick={() => { setActiveTab('signup'); setAuthError(''); }}
-                  style={{
-                    flex: 1, padding: '12px 0', fontWeight: 700, fontSize: 16,
-                    color: activeTab === 'signup' ? 'white' : '#6b7280',
-                    borderBottom: activeTab === 'signup' ? '2px solid #10b981' : 'none',
-                    background: 'none', border: 'none', cursor: 'pointer'
-                  }}
+                  className={`auth-tab-btn ${activeTab === 'signup' ? 'active' : ''}`}
                 >
                   Sign Up
                 </button>
-              </motion.div>
+              </div>
 
               <button
+                type="button"
                 onClick={() => setIsAuthModalOpen(false)}
-                style={{
-                  position: 'absolute', top: 16, right: 16, background: 'none', border: 'none',
-                  color: '#9ca3af', cursor: 'pointer', padding: 8
-                }}
+                className="auth-modal-close"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
 
               {authError && (
@@ -558,58 +492,63 @@ export default function LandingPage() {
                 </div>
               )}
 
-              <form onSubmit={handleCustomSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <form onSubmit={handleCustomSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
                 {activeTab === 'signup' && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Full Name</label>
-                    <input
-                      type="text"
-                      placeholder="John Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={submitting || loadingRole !== null}
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '14px 16px', color: 'white', fontSize: 15, outline: 'none', boxSizing: 'border-box' }}
-                    />
+                  <div className="auth-input-group">
+                    <label className="auth-label">Full Name</label>
+                    <div className="auth-input-wrapper">
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={submitting || loadingRole !== null}
+                        className="auth-input"
+                      />
+                      <User className="auth-input-icon" size={18} />
+                    </div>
                   </div>
                 )}
 
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Email</label>
-                  <input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={submitting || loadingRole !== null}
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '14px 16px', color: 'white', fontSize: 15, outline: 'none', boxSizing: 'border-box' }}
-                  />
+                <div className="auth-input-group">
+                  <label className="auth-label">Email Address</label>
+                  <div className="auth-input-wrapper">
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={submitting || loadingRole !== null}
+                      className="auth-input"
+                    />
+                    <Mail className="auth-input-icon" size={18} />
+                  </div>
                 </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Password</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={submitting || loadingRole !== null}
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '14px 16px', color: 'white', fontSize: 15, outline: 'none', boxSizing: 'border-box' }}
-                  />
+                <div className="auth-input-group">
+                  <label className="auth-label">Password</label>
+                  <div className="auth-input-wrapper">
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={submitting || loadingRole !== null}
+                      className="auth-input"
+                    />
+                    <Lock className="auth-input-icon" size={18} />
+                  </div>
                 </div>
 
                 {activeTab === 'signup' && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>Register As</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="auth-input-group">
+                    <label className="auth-label">Register As</label>
+                    <div className="auth-role-container">
                       <button
                         type="button"
                         onClick={() => setRole('student')}
                         disabled={submitting || loadingRole !== null}
-                        style={{
-                          padding: '14px', borderRadius: 12, border: role === 'student' ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
-                          background: role === 'student' ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.03)',
-                          color: role === 'student' ? 'white' : '#9ca3af', fontWeight: 700, fontSize: 15, cursor: 'pointer'
-                        }}
+                        className={`auth-role-btn student ${role === 'student' ? 'active' : ''}`}
                       >
                         👩‍🎓 Student
                       </button>
@@ -617,11 +556,7 @@ export default function LandingPage() {
                         type="button"
                         onClick={() => setRole('teacher')}
                         disabled={submitting || loadingRole !== null}
-                        style={{
-                          padding: '14px', borderRadius: 12, border: role === 'teacher' ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
-                          background: role === 'teacher' ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.03)',
-                          color: role === 'teacher' ? 'white' : '#9ca3af', fontWeight: 700, fontSize: 15, cursor: 'pointer'
-                        }}
+                        className={`auth-role-btn teacher ${role === 'teacher' ? 'active' : ''}`}
                       >
                         👨‍🏫 Teacher
                       </button>
@@ -632,40 +567,30 @@ export default function LandingPage() {
                 <button
                   type="submit"
                   disabled={submitting || loadingRole !== null}
-                  style={{
-                    width: '100%', marginTop: 8, padding: '16px', borderRadius: 14, border: 'none',
-                    background: 'linear-gradient(90deg, #10b981, #06b6d4)', color: 'white', fontWeight: 800,
-                    fontSize: 16, cursor: 'pointer', boxShadow: '0 8px 24px rgba(16,185,129,0.3)',
-                    opacity: submitting ? 0.6 : 1
-                  }}
+                  className="auth-submit-btn"
+                  style={{ opacity: submitting ? 0.6 : 1 }}
                 >
                   {submitting ? 'Please wait...' : activeTab === 'login' ? 'Sign In' : 'Create Account'}
                 </button>
 
-                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                <div className="auth-google-row">
                   <button
                     type="button"
                     onClick={() => handleGoogleLoginClick('student')}
                     disabled={submitting || loadingRole !== null}
-                    style={{
-                      flex: 1, padding: '14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
-                      background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 600, fontSize: 14,
-                      cursor: 'pointer', opacity: loadingRole === 'student' ? 0.6 : 1
-                    }}
+                    className="auth-google-btn"
+                    style={{ opacity: loadingRole === 'student' ? 0.6 : 1 }}
                   >
-                    {loadingRole === 'student' ? '...' : '👨‍🎓 Google'}
+                    <span>👩‍🎓 Google</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleGoogleLoginClick('teacher')}
                     disabled={submitting || loadingRole !== null}
-                    style={{
-                      flex: 1, padding: '14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
-                      background: 'rgba(255,255,255,0.03)', color: 'white', fontWeight: 600, fontSize: 14,
-                      cursor: 'pointer', opacity: loadingRole === 'teacher' ? 0.6 : 1
-                    }}
+                    className="auth-google-btn"
+                    style={{ opacity: loadingRole === 'teacher' ? 0.6 : 1 }}
                   >
-                    {loadingRole === 'teacher' ? '...' : '👨‍🏫 Google'}
+                    <span>👨‍🏫 Google</span>
                   </button>
                 </div>
               </form>

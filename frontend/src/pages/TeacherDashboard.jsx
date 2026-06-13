@@ -213,7 +213,7 @@ const TeacherDashboard = () => {
     <div className="dashboard-container teacher-profile-page">
       <nav className="dashboard-nav glass-panel">
         <div>
-          <div className="nav-brand">EduStream</div>
+          <div className="nav-brand">EduVerse</div>
           <p className="nav-subtitle">Teacher profile dashboard</p>
         </div>
         <div className="nav-profile">

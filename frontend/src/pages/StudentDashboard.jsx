@@ -67,7 +67,7 @@ const StudentDashboard = () => {
   return (
     <div className="dashboard-container">
       <nav className="dashboard-nav glass-panel">
-        <div className="nav-brand">EduStream</div>
+        <div className="nav-brand">EduVerse</div>
         <div className="nav-profile">
           <span>Student: {user?.name}</span>
           <img src={user?.avatar || '/favicon.svg'} alt="avatar" className="avatar" />

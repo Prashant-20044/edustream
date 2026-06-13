@@ -159,7 +159,7 @@ export default function ParticleButton({ children = 'Click Me', onClick, classNa
       ref={buttonRef}
       onClick={handleClick}
       type="button"
-      className={`relative inline-flex min-h-[78px] min-w-[260px] items-center justify-center border border-transparent cursor-pointer px-12 py-5 rounded-full overflow-hidden text-2xl transition-all duration-300 ${
+      className={`relative inline-flex min-h-[64px] min-w-[220px] items-center justify-center border border-transparent cursor-pointer px-8 py-4 sm:min-h-[78px] sm:min-w-[260px] sm:px-12 sm:py-5 rounded-full overflow-hidden transition-all duration-300 ${
         isActive
           ? 'bg-black border-white'
           : 'bg-white'
@@ -171,7 +171,7 @@ export default function ParticleButton({ children = 'Click Me', onClick, classNa
         className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none"
       />
       <span
-        className={`relative z-20 inline-flex px-6 py-1 text-2xl font-bold uppercase leading-none transition-colors ${
+        className={`relative z-20 inline-flex px-3 py-1 text-lg sm:px-6 sm:text-2xl font-bold uppercase leading-none transition-colors ${
           isActive ? 'text-white' : 'text-black'
         }`}
       >
