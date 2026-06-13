@@ -194,7 +194,7 @@ const LiveClassRoom = () => {
           </button>
           <h2>{classTopic}</h2>
         </div>
-        <div className="header-right" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="header-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {isTeacher && (
             <>
               {/* Hidden file input for PPT broadcast */}
