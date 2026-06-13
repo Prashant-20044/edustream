@@ -59,8 +59,16 @@ router.post('/google', async (req, res) => {
       await user.save();
     } else {
       const requestedRole = ['teacher', 'student'].includes(role) ? role : user.role;
+
+      // Preserve the user's custom name if they signed up with email/password.
+      // Only pull the name from Google for pure OAuth accounts (no password set).
+      const resolvedName = user.password
+        ? user.name                  // email/password account → keep their chosen username
+        : (name || user.name);       // OAuth-only account → sync name from Google
+
       const profileUpdates = {
-        name: name || user.name,
+        name: resolvedName,
+        // Always update avatar from Google (nice to have fresh profile picture)
         avatar: picture || user.avatar,
         role: requestedRole,
       };
